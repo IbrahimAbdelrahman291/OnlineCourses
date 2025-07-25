@@ -21,7 +21,7 @@ namespace BAL.GenericRepository
         {
             _configuration = configuration;
         }
-        public async Task<string> CreateTokenAsyync(AppUser user, UserManager<AppUser> userManager)
+        public async Task<string> CreateTokenAsync(AppUser user, UserManager<AppUser> userManager)
         {
             var Authclaims = new List<Claim>()
             {

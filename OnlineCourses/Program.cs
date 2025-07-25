@@ -3,9 +3,12 @@ using BAL.GenericRepository;
 using BAL.Interfaces;
 using DAL.Context;
 using DAL.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OnlineCourses.Helper;
+using System.Text;
 
 namespace OnlineCourses
 {
@@ -27,16 +30,38 @@ namespace OnlineCourses
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
             // Add Identity services
-            builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<CoursesDbContext>().AddDefaultTokenProviders();
-            builder.Services.AddAuthentication();
+            builder.Services.AddScoped<ITokenServices, TokenServices>();
+            builder.Services.AddIdentity<AppUser, IdentityRole>(options => 
+            {
+                options.Password.RequireDigit = true;             
+                options.Password.RequiredLength = 6;              
+                options.Password.RequireNonAlphanumeric = true;   
+                options.Password.RequireUppercase = true;         
+                options.Password.RequireLowercase = false;
+            }).AddEntityFrameworkStores<CoursesDbContext>().AddDefaultTokenProviders();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Options => 
+            {
+                Options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["JWT:Validaud"],
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
+                };
+            });
             
             var app = builder.Build();
 
             using var Scpoe = app.Services.CreateScope();
             var services = Scpoe.ServiceProvider;
             var UserManager = services.GetRequiredService<UserManager<AppUser>>();
-            await UsersSeedr.SeedUsersAsync(UserManager);
+            var RoleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            await UsersSeedr.SeedUsersAsync(UserManager,RoleManager);
             
 
 
@@ -48,6 +73,7 @@ namespace OnlineCourses
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
 

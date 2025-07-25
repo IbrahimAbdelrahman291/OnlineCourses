@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Context
 {
-    public class CoursesDbContext : IdentityUserContext<AppUser>
+    public class CoursesDbContext : IdentityDbContext<AppUser>
     {
         public CoursesDbContext(DbContextOptions<CoursesDbContext> options) : base(options)
         {
@@ -24,7 +24,7 @@ namespace DAL.Context
         }
 
         // DbSet properties for your entities
-        public DbSet<Models.Courses> Courses { get; set; }
-        public DbSet<Models.CourseLessons> CourseLessons { get; set; }
+        public DbSet<Courses> Courses { get; set; }
+        public DbSet<CourseLessons> CourseLessons { get; set; }
     }
 }

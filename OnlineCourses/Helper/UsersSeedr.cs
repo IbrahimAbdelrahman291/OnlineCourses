@@ -6,7 +6,7 @@ namespace OnlineCourses.Helper
 {
     public static class UsersSeedr
     {
-        public static async Task SeedUsersAsync(UserManager<AppUser> userManager)
+        public static async Task SeedUsersAsync(UserManager<AppUser> userManager,RoleManager<IdentityRole> roleManager)
         {
             // This method is intentionally left empty.
             // It can be used to seed initial user data if needed in the future.
@@ -15,10 +15,12 @@ namespace OnlineCourses.Helper
                 var user = new AppUser() 
                 {
                     DisplayName = "Admin",
-                    UserName = "admin",
-                    Email = "admin@gmail.com",
+                    UserName = "AB",
+                    Email = "AB@gmail.com",
                 };
-                await userManager.CreateAsync(user, "P@$$w0rd");
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+                await userManager.CreateAsync(user, "P@$$w0rdAB");
+                await userManager.AddToRoleAsync(user, "Admin");
             }
         }
     }

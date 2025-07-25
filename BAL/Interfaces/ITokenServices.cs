@@ -10,6 +10,6 @@ namespace BAL.Interfaces
 {
     public interface ITokenServices
     {
-        Task<string> CreateTokenAsyync(AppUser user,UserManager<AppUser> userManager);
+        Task<string> CreateTokenAsync(AppUser user,UserManager<AppUser> userManager);
     }
 }
