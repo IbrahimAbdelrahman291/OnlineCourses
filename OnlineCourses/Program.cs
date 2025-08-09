@@ -25,23 +25,28 @@ namespace OnlineCourses
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));// any thing use IGenericRepository will use GenericRepository
+            
             // Add DbContext with SQL Server configuration
-            builder.Services.AddDbContext<CoursesDbContext>(options => 
+            builder.Services.AddDbContext<CoursesDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            // Add AutoMapper configuration
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+            
+            #region Identity and auth
             // Add Identity services
             builder.Services.AddScoped<ITokenServices, TokenServices>();
-            builder.Services.AddIdentity<AppUser, IdentityRole>(options => 
+            builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
             {
-                options.Password.RequireDigit = true;             
-                options.Password.RequiredLength = 6;              
-                options.Password.RequireNonAlphanumeric = true;   
-                options.Password.RequireUppercase = true;         
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = false;
             }).AddEntityFrameworkStores<CoursesDbContext>().AddDefaultTokenProviders();
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Options => 
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Options =>
             {
                 Options.TokenValidationParameters = new TokenValidationParameters()
                 {
@@ -54,15 +59,17 @@ namespace OnlineCourses
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
                 };
             });
-            
+
+            #endregion
+
             var app = builder.Build();
 
             using var Scpoe = app.Services.CreateScope();
             var services = Scpoe.ServiceProvider;
             var UserManager = services.GetRequiredService<UserManager<AppUser>>();
             var RoleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            await UsersSeedr.SeedUsersAsync(UserManager,RoleManager);
-            
+            await UsersSeedr.SeedUsersAsync(UserManager, RoleManager);
+
 
 
             // Configure the HTTP request pipeline.
@@ -71,7 +78,7 @@ namespace OnlineCourses
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseAuthentication();

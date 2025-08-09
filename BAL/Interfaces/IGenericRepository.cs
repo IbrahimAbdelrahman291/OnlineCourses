@@ -1,4 +1,5 @@
-﻿using DAL.Models;
+﻿using BAL.Specification;
+using DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,12 @@ namespace BAL.Interfaces
         public Task AddAsync(T item);
         public void Update(T item);
         public void Delete(int id);
+
+        #region Specification
+        public Task<ICollection<T>> GetAllWithSpecAsync(ISpecification<T> spec);
+        public Task<T> GetByIdWithSpecAsync(ISpecification<T> spec);
+
+        #endregion
         public Task<int> CompleteAsync();
 
     }

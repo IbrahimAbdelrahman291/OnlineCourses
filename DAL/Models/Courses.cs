@@ -9,6 +9,7 @@ namespace DAL.Models
 {
     public class Courses : BaseEntity
     {
+        public double Price { get; set; } // price of the course
         public string CourseName { get; set; }
         public string Description { get; set; }
         public int Credits { get; set; }//how many hours of course
